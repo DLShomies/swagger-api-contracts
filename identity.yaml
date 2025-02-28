@@ -1,0 +1,249 @@
+openapi: 3.1.1
+info:
+  title: Identity Microservice API - Fluffy Plushies Webshop
+  version: "4.0.0"
+  description: API for user identity management
+servers:
+  - url: http://localhost:8081/identity
+paths:
+  /users:
+    get:
+      summary: Retrieve all users
+      description: Retrieve all users. Requires a token provided in the header.
+      parameters:
+        - $ref: '#/components/parameters/TokenHeader'
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a new user
+      description: Create a new user with username, password, email, phone, and address.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+  /users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/TokenHeader'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve user details
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+    patch:
+      summary: Update user details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+        '404':
+          description: User not found
+    delete:
+      summary: Delete a user
+      responses:
+        '204':
+          description: User deleted
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+  /auth/login:
+    post:
+      summary: Authenticate user and obtain token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Returns JSON with token and expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /auth/validate:
+    get:
+      summary: Validate authentication token
+      parameters:
+        - $ref: '#/components/parameters/TokenHeader'
+      responses:
+        '200':
+          description: Token valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidationResponse'
+        '401':
+          description: Invalid/expired token
+components:
+  parameters:
+    TokenHeader:
+      in: header
+      name: token
+      description: Authentication token.
+      required: true
+      schema:
+        type: string
+        format: token
+  schemas:
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: "123 Main St"
+        postal_code:
+          type: number
+          example: 12345
+        city:
+          type: string
+          example: "New York"
+        country:
+          type: string
+          example: "United States of America"  
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "user123"
+        username:
+          type: string
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "johndoe@example.com"
+        phone:
+          type: number
+          example: 1234567890
+        address:
+          $ref: '#/components/schemas/Address'
+    UserInput:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "johndoe"
+        password:
+          type: string
+          example: "securePassword"
+        email:
+          type: string
+          format: email
+          example: "johndoe@example.com"
+        phone:
+          type: number
+          example: 1234567890
+        address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - username
+        - password
+        - email
+        - phone
+        - address
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "johndoe"
+        password:
+          type: string
+          example: "newSecurePassword"
+        email:
+          type: string
+          format: email
+          example: "johndoe@example.com"
+        phone:
+          type: number
+          example: 1234567890
+        address:
+          $ref: '#/components/schemas/Address'
+    AuthRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "johndoe"
+        password:
+          type: string
+          example: "securePassword"
+      required:
+        - username
+        - password
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          format: token
+          example: "abc123token"
+        expires_in:
+          type: integer
+          example: 3600
+      required:
+        - token
+        - expires_in
+    TokenValidationResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: "0195476b-3145-7715-85f7-158f338a9205"
+        role:
+          type: string
+          example: "Admin"

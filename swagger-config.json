@@ -1,0 +1,7 @@
+{
+  "urls": [
+    { "name": "Identity Service", "url": "./identity.yaml" },
+    { "name": "Inventory Service", "url": "./inventory.yaml" },
+    { "name": "Order Service", "url": "./order.yaml" }
+  ]
+}

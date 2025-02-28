@@ -1,0 +1,262 @@
+openapi: 3.1.1
+info:
+  title: Order Microservice API - Fluffy Plushies Webshop
+  version: "1.0.0"
+  description: API to manage orders for the Fluffy Plushies Webshop.
+servers:
+  - url: http://localhost:8083/orders
+paths:
+  /orders: 
+    post:
+      summary: Place a new order.
+      operationId: create_order
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/order_request'
+      responses:
+        '201':
+          description: Order created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order_response'
+        '400':
+          description: Invalid input.
+        '401':
+          description: Unauthorized.
+        '500':
+          description: Internal server error.
+    get:
+      summary: Retrieve all orders.
+      operationId: get_all_orders
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: A list of orders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/order_response'
+        '401':
+          description: Unauthorized.
+        '500':
+          description: Internal server error.
+  /orders/{order_id}:
+    get:
+      summary: Retrieve a specific order by its ID.
+      operationId: get_order_by_id
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order_response'
+        '400':
+          description: Bad argument.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Order not found.
+        '500':
+          description: Internal server error.
+    patch:
+      summary: Update a specific order.
+      operationId: update_order
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/order_update'
+      responses:
+        '200':
+          description: Order updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order_response'
+        '400':
+          description: Invalid input.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Order not found.
+        '500':
+          description: Internal server error.
+    delete:
+      summary: Delete a specific order.
+      operationId: delete_order
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order deleted successfully.
+        '400':
+          description: Invalid input.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Order not found.
+        '500':
+          description: Internal server error.
+  /orders/user/{user_id}:
+    get:
+      summary: Retrieve all orders for a specific user.
+      operationId: get_orders_by_user_id
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of orders for the specified user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/order_response'
+        '400':
+          description: Invalid input.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: No orders found for the user.
+        '500':
+          description: Internal server error.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    order_request:
+      type: object
+      properties:
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/line_item'
+      required:
+        - line_items
+    order_response:
+      allOf:
+        - type: object
+          properties:
+            order_id:
+              type: string
+              description: Unique identifier assigned to the order.
+            user_id:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+              description: Timestamp when the order was created.
+        - $ref: '#/components/schemas/order_update'
+      required:
+        - order_id
+        - user_id
+        - created_at
+    order_update:
+      type: object
+      properties:
+        customer_name:
+          type: string
+        address:
+          $ref: '#/components/schemas/address'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/line_item'
+        shipping_cost:
+          type: number
+          description: The total shipping cost for the order.
+        total_amount:
+          type: number
+          description: The total order sum.
+        status:
+          type: string
+          description: Current status of the order.
+      required:
+        - customer_name
+        - address
+        - line_items
+        - shipping_cost
+        - total_amount
+        - status
+    address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: "123 Main St"
+        postal_code:
+          type: number
+          example: 12345
+        city:
+          type: string
+          example: "New York"
+        country:
+          type: string
+          example: "USA"
+      required:
+        - street
+        - city
+        - postal_code
+        - country
+    line_item:
+      type: object
+      properties:
+        item_id:
+          type: string
+        item_name:
+          type: string
+          description: Name of the item.
+        quantity:
+          type: integer
+          minimum: 1
+        price_per_item:
+          type: number
+          format: float
+          description: Price per individual item.
+      required:
+        - item_id
+        - item_name
+        - quantity
+        - price_per_item
