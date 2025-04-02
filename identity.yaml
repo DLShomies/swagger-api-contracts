@@ -1,11 +1,13 @@
 openapi: 3.1.1
 info:
   title: Identity Microservice API - Fluffy Plushies Webshop
-  version: "4.0.0"
+  version: "5.0.0"
   description: API for user identity management
 servers:
   - url: http://localhost:8081/identity
+  
 paths:
+
   /users:
     get:
       summary: Retrieve all users
@@ -20,7 +22,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/UserResponse'
         '400':
           description: Bad request
         '401':
@@ -33,16 +35,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInput'
+              $ref: '#/components/schemas/UserRequest'
       responses:
         '201':
           description: User created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Invalid input
+          
   /users/{id}:
     parameters:
       - $ref: '#/components/parameters/TokenHeader'
@@ -59,7 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Bad request
         '404':
@@ -71,14 +74,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/UserRequest'
       responses:
         '200':
           description: Updated user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Invalid input
         '404':
@@ -92,6 +95,7 @@ paths:
           description: Bad request
         '404':
           description: User not found
+          
   /auth/login:
     post:
       summary: Authenticate user and obtain token
@@ -112,6 +116,7 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
+          
   /auth/validate:
     get:
       summary: Validate authentication token
@@ -126,7 +131,9 @@ paths:
                 $ref: '#/components/schemas/TokenValidationResponse'
         '401':
           description: Invalid/expired token
+          
 components:
+
   parameters:
     TokenHeader:
       in: header
@@ -136,7 +143,9 @@ components:
       schema:
         type: string
         format: token
+        
   schemas:
+  
     Address:
       type: object
       properties:
@@ -152,12 +161,13 @@ components:
         country:
           type: string
           example: "United States of America"  
-    User:
+          
+    UserResponse:
       type: object
       properties:
         id:
           type: string
-          example: "user123"
+          example: "017f22f2-79a3-7d09-93e0-1d3d9b4d7e12"
         username:
           type: string
           example: "johndoe"
@@ -166,11 +176,12 @@ components:
           format: email
           example: "johndoe@example.com"
         phone:
-          type: number
-          example: 1234567890
+          type: string
+          example: "1234567890"
         address:
           $ref: '#/components/schemas/Address'
-    UserInput:
+          
+    UserRequest:
       type: object
       properties:
         username:
@@ -178,14 +189,14 @@ components:
           example: "johndoe"
         password:
           type: string
-          example: "securePassword"
+          example: "Str0ngP@ssw0rd"
         email:
           type: string
           format: email
           example: "johndoe@example.com"
         phone:
-          type: number
-          example: 1234567890
+          type: string
+          example: "1234567890"
         address:
           $ref: '#/components/schemas/Address'
       required:
@@ -194,24 +205,7 @@ components:
         - email
         - phone
         - address
-    UserUpdate:
-      type: object
-      properties:
-        username:
-          type: string
-          example: "johndoe"
-        password:
-          type: string
-          example: "newSecurePassword"
-        email:
-          type: string
-          format: email
-          example: "johndoe@example.com"
-        phone:
-          type: number
-          example: 1234567890
-        address:
-          $ref: '#/components/schemas/Address'
+
     AuthRequest:
       type: object
       properties:
@@ -220,10 +214,11 @@ components:
           example: "johndoe"
         password:
           type: string
-          example: "securePassword"
+          example: "Str0ngP@ssw0rd"
       required:
         - username
         - password
+        
     AuthResponse:
       type: object
       properties:
@@ -237,13 +232,14 @@ components:
       required:
         - token
         - expires_in
+        
     TokenValidationResponse:
       type: object
       properties:
         user_id:
           type: string
           format: uuid
-          example: "0195476b-3145-7715-85f7-158f338a9205"
+          example: "017f22f2-79a3-7d09-93e0-1d3d9b4d7e12"
         role:
           type: string
           example: "Admin"
