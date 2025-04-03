@@ -149,6 +149,9 @@ components:
     Address:
       type: object
       properties:
+        id:
+          type: string
+          example: "017f22f2-79a3-7d09-93e0-1d3d9b4d7e12"
         street:
           type: string
           example: "123 Main St"
