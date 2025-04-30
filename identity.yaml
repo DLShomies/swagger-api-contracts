@@ -1,7 +1,7 @@
 openapi: 3.1.1
 info:
   title: Identity Microservice API - Fluffy Plushies Webshop
-  version: "5.0.0"
+  version: "6.0.0"
   description: API for user identity management
 servers:
   - url: http://localhost:8081/identity
@@ -35,7 +35,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRequest'
+              $ref: '#/components/schemas/CreateUserRequest'
       responses:
         '201':
           description: User created
@@ -68,13 +68,13 @@ paths:
         '404':
           description: User not found
     patch:
-      summary: Update user details
+      summary: Update user phone number and/or address
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRequest'
+              $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
           description: Updated user
@@ -93,6 +93,34 @@ paths:
           description: User deleted
         '400':
           description: Bad request
+        '404':
+          description: User not found
+
+  /users/{id}/password:
+    parameters:
+      - $ref: '#/components/parameters/TokenHeader'
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    patch:
+      summary: Update password only
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '200':
+          description: Updated password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid input
         '404':
           description: User not found
           
@@ -184,7 +212,7 @@ components:
         address:
           $ref: '#/components/schemas/Address'
           
-    UserRequest:
+    CreateUserRequest:
       type: object
       properties:
         username:
@@ -208,6 +236,24 @@ components:
         - email
         - phone
         - address
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: "1234567890"
+        address:
+          $ref: '#/components/schemas/Address'
+
+    UpdatePasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          example: "Str0ngP@ssw0rD"
+      required:
+        - password
 
     AuthRequest:
       type: object
@@ -234,7 +280,7 @@ components:
           example: 3600
       required:
         - token
-        - expires_in
+        - expires_at
         
     TokenValidationResponse:
       type: object
