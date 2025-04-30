@@ -1,7 +1,7 @@
 openapi: 3.1.1
 info:
   title: Identity Microservice API - Fluffy Plushies Webshop
-  version: "5.0.0"
+  version: "6.0.0"
   description: API for user identity management
 servers:
   - url: http://localhost:8081/identity
